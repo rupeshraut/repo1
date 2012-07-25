@@ -12,7 +12,7 @@ public class Test {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
-
+		System.out.println(Test.class.getName());
 	}
 
 }
