@@ -282,15 +282,16 @@ public class ReportTemplate {
 	 * Export html.
 	 * 
 	 * @return the byte[]
+	 * @throws ReportingException 
 	 */
-	private byte[] exportHTML() {
+	private byte[] exportHTML() throws ReportingException {
 		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
 			JRHtmlExporter htmlExporter = new JRHtmlExporter();
 			htmlExporter.setParameter(JRExporterParameter.JASPER_PRINT, getJasperPrint());
 			htmlExporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new ReportingException("error occurred while exporting report to HTML", e);
 		} finally {
 			IOUtils.closeQuietly(outputStream);
 		}// try-catch-finally
