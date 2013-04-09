@@ -15,10 +15,12 @@ public enum ExportType {
 	DOC("DOC", "doc"),
 	/** The docx. */
 	DOCX("DOCX", "docx"),
+	/** The pptx. */
+	PPTX("PPTX", "pptx"),
 	/** The xsl. */
-	XSL("XSL", "xsl"),
+	XLS("XLS", "xls"),
 	/** The xslx. */
-	XSLX("XSLX", "xslx"),
+	XLSX("XLSX", "xlsx"),
 	/** The image jpeg. */
 	IMAGE_JPEG("IMAGE_JPEG", "jpeg"),
 	/** The image bmp. */
@@ -26,7 +28,9 @@ public enum ExportType {
 	/** The image png. */
 	IMAGE_PNG("IMAGE_PNG", "png"),
 	/** The txt. */
-	TXT("TXT", "txt"), ;
+	TXT("TXT", "txt"),
+	/** The rtf. */
+	RTF("RTF", "rtf");
 
 	/** The type. */
 	private String type;

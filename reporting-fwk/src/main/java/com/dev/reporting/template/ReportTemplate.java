@@ -8,13 +8,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.JRHtmlExporter;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.export.JRRtfExporter;
+import net.sf.jasperreports.engine.export.JRXlsExporter;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
+import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
 
 import org.apache.commons.io.FileUtils;
@@ -152,7 +159,7 @@ public class ReportTemplate {
 		}// try-catch
 
 		if (inputStream == null) {
-			throw new ReportingException( String.format("report design file %s not found", getFileName()));
+			throw new ReportingException(String.format("report design file %s not found", getFileName()));
 		}// if
 
 		return inputStream;
@@ -232,6 +239,29 @@ public class ReportTemplate {
 	/**
 	 * Export.
 	 * 
+	 * @param exporter
+	 *            the exporter
+	 * @return the byte[]
+	 * @throws ReportingException
+	 *             the reporting exception
+	 */
+	public byte[] export(final JRExporter exporter) throws ReportingException {
+		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		try {
+			exporter.setParameter(JRExporterParameter.JASPER_PRINT, getJasperPrint());
+			exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
+		} catch (Exception e) {
+			throw new ReportingException("error occurred while exporting report to HTML", e);
+		} finally {
+			IOUtils.closeQuietly(outputStream);
+		}// try-catch-finally
+
+		return outputStream.toByteArray();
+	}// export()
+
+	/**
+	 * Export.
+	 * 
 	 * @param exportType
 	 *            the export type
 	 * @return the byte[]
@@ -248,6 +278,7 @@ public class ReportTemplate {
 		try {
 
 			switch (exportType) {
+
 			case PDF:
 				data = exportPDF();
 				break;
@@ -256,9 +287,30 @@ public class ReportTemplate {
 				data = exportHTML();
 				break;
 
+			case XLS:
+				data = exportXLS();
+				break;
+
+			case XLSX:
+				data = exportXLSX();
+				break;
+
+			case PPTX:
+				data = exportPPTX();
+				break;
+
+			case DOCX:
+				data = exportDOCX();
+				break;
+
+			case RTF:
+				data = exportRTF();
+				break;
+
 			default:
 				throw new ReportingException("Invaild export option");
-			}
+			}// switch
+
 		} catch (ReportingException e) {
 			throw e;
 		} catch (Exception e) {
@@ -274,28 +326,76 @@ public class ReportTemplate {
 	 * @return the byte[]
 	 * @throws JRException
 	 */
-	private byte[] exportPDF() throws JRException {
-		return JasperExportManager.exportReportToPdf(jasperPrint);
+	private byte[] exportPDF() throws ReportingException {
+		return export(new JRPdfExporter());
+	}
+
+	/**
+	 * Export xls.
+	 * 
+	 * @return the byte[]
+	 * @throws ReportingException
+	 *             the reporting exception
+	 */
+	private byte[] exportXLS() throws ReportingException {
+		final JRXlsExporter exporter = new JRXlsExporter();
+		exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.TRUE);
+		return export(exporter);
+	}
+
+	/**
+	 * Export xlsx.
+	 * 
+	 * @return the byte[]
+	 * @throws ReportingException
+	 *             the reporting exception
+	 */
+	private byte[] exportXLSX() throws ReportingException {
+		final JRXlsxExporter exporter = new JRXlsxExporter();
+		exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.TRUE);
+		return export(exporter);
+	}
+
+	/**
+	 * Export pptx.
+	 * 
+	 * @return the byte[]
+	 * @throws ReportingException
+	 *             the reporting exception
+	 */
+	private byte[] exportPPTX() throws ReportingException {
+		return export(new JRPptxExporter());
+	}
+
+	/**
+	 * Export docx.
+	 * 
+	 * @return the byte[]
+	 * @throws ReportingException
+	 *             the reporting exception
+	 */
+	private byte[] exportDOCX() throws ReportingException {
+		return export(new JRDocxExporter());
+	}
+
+	/**
+	 * Export rtf.
+	 * 
+	 * @return the byte[]
+	 * @throws ReportingException
+	 *             the reporting exception
+	 */
+	private byte[] exportRTF() throws ReportingException {
+		return export(new JRRtfExporter());
 	}
 
 	/**
 	 * Export html.
 	 * 
 	 * @return the byte[]
-	 * @throws ReportingException 
+	 * @throws ReportingException
 	 */
 	private byte[] exportHTML() throws ReportingException {
-		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		try {
-			JRHtmlExporter htmlExporter = new JRHtmlExporter();
-			htmlExporter.setParameter(JRExporterParameter.JASPER_PRINT, getJasperPrint());
-			htmlExporter.setParameter(JRExporterParameter.OUTPUT_STREAM, outputStream);
-		} catch (Exception e) {
-			throw new ReportingException("error occurred while exporting report to HTML", e);
-		} finally {
-			IOUtils.closeQuietly(outputStream);
-		}// try-catch-finally
-
-		return outputStream.toByteArray();
+		return export(new JRHtmlExporter());
 	}
 }// class
