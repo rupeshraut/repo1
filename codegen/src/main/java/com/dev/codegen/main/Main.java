@@ -177,24 +177,8 @@ public class Main {
 				DATA_SOURCE.close();
 			}// if
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LOG.error("error occurred while closing data source", e);
 		}// try-catch
-	}
-
-	/**
-	 * Close connection.
-	 * 
-	 * @param connection
-	 *            the connection
-	 */
-	void closeConnection(Connection connection) {
-		if (connection != null) {
-			try {
-				connection.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}// try-catch
-		}// if
 	}
 
 	/**
@@ -220,7 +204,7 @@ public class Main {
 
 			while (tableResultSet.next()) {
 				final String tableName = tableResultSet.getString(3);
-				
+
 				// ResultSet exportedKeysResultSet =
 				// databaseMetaData.getExportedKeys(null, null, tableName);
 				// System.out.println("==============" + tableName +
@@ -805,17 +789,8 @@ public class Main {
 	 * @return
 	 */
 	private static String formatTableName(String tableName) {
-		return StringUtils.deleteWhitespace(
-					WordUtils.capitalize(
-							WordUtils.uncapitalize(
-									StringUtils.lowerCase(
-											StringUtils.replaceEach(
-													StringUtils.upperCase(tableName), new String[] { "_" }, new String[] { " " }
-											)
-									)
-							)
-					)
-				);
+		return StringUtils.deleteWhitespace(WordUtils.capitalize(WordUtils.uncapitalize(StringUtils.lowerCase(StringUtils.replaceEach(
+				StringUtils.upperCase(tableName), new String[] { "_" }, new String[] { " " })))));
 	}
 
 	/**
@@ -827,7 +802,7 @@ public class Main {
 	 *             the codegen exception
 	 */
 	public static void main(String[] args) throws CodegenException {
-		 new Main().generateCode();
+		new Main().generateCode();
 	}// main
 
 }
