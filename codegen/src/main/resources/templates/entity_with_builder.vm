@@ -1,0 +1,84 @@
+package $package_name;
+
+#set( $class_name = $STRING_UTILS.capitalize($class_name)+''+$class_name_suffix)
+#set( $builder_class_name = $STRING_UTILS.capitalize($class_name)+'Builder')
+
+/**
+ * The Class $class_name.
+ */
+public class $class_name {
+
+#foreach( $field in $fields )
+    private $field.dataType $STRING_UTILS.uncapitalize($field.name);
+#end
+
+	/**
+	* default class constructor
+	*/
+	public $class_name(){
+		super();
+	}
+	
+	/**
+	 * Instantiates a new $class_name.
+	 * 
+	 * @param builder
+	 *            the builder
+	 */
+	private $class_name($builder_class_name builder){
+#foreach( $field in $fields )
+    	this.$STRING_UTILS.uncapitalize($field.name) = builder.$STRING_UTILS.uncapitalize($field.name);
+#end
+	} 
+
+#foreach( $field in $fields )
+#set( $field_name = $STRING_UTILS.uncapitalize($field.name))
+#if($STRING_UTILS.equals($field.dataType, "java.lang.Boolean"))
+    public $field.dataType is$STRING_UTILS.capitalize($field.name)() {
+    	return $field.name;
+    }
+
+#else
+    public $field.dataType get$STRING_UTILS.capitalize($field.name)() {
+    	return $field.name;
+    }
+
+#end
+    public void set$STRING_UTILS.capitalize($field.name)($field.dataType $STRING_UTILS.uncapitalize($field.name)) {
+    	this.$field.name = $field.name;
+    }
+
+#end
+
+    /**
+	 * The Class $builder_class_name.
+	 */
+	public static class $builder_class_name  implements org.apache.commons.lang3.builder.Builder<$class_name> {
+	
+#foreach( $field in $fields )
+    	private $field.dataType $STRING_UTILS.uncapitalize($field.name);
+#end
+	
+#foreach( $field in $fields )
+#set( $field_name = $STRING_UTILS.uncapitalize($field.name))
+        public $builder_class_name with$STRING_UTILS.capitalize($field.name)($field.dataType $STRING_UTILS.uncapitalize($field.name)) {
+            this.$field_name = $field_name;
+            return this;
+        }
+
+#end	
+	
+	   /**
+		* Builds the.
+		* 
+		* @return the $class_name
+		* @see org.apache.commons.lang3.builder.Builder#build()
+		*/
+		@Override
+		public $class_name build() {
+			return new $class_name(this);
+		}
+	
+	}//$builder_class_name
+	
+}//class

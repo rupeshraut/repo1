@@ -1,0 +1,23 @@
+package $package_name;
+
+import ${entity_package_name}.${class_name};
+#set( $class_name_ = $STRING_UTILS.capitalize($class_name)+$dao_suffix)
+
+/**
+ * The Class $class_name_.
+ */
+public interface $class_name_ {
+
+	enum Columns {
+		$enum;
+	};
+
+	java.util.List<$class_name> list();
+	$class_name get($STRING_UTILS.join($find_one_method_agrs, ' ,'));
+	java.util.List<$class_name> findByProperty(${class_name_}.Columns column, Object value);
+	$class_name save($class_name $STRING_UTILS.uncapitalize($class_name));
+	$class_name update($class_name $STRING_UTILS.uncapitalize($class_name));
+	boolean delete();
+	boolean deleteAll();
+	
+}//class

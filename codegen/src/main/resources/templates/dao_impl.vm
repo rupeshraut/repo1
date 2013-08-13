@@ -1,0 +1,108 @@
+package $package_name;
+
+#set( $class_name_ = $STRING_UTILS.capitalize($class_name)+$class_name_suffix)
+#set( $dao_class_name_ = $STRING_UTILS.capitalize($class_name)+$dao_suffix)
+import ${entity_package_name}.${class_name};
+import ${dao_package_name}.${dao_class_name_};
+import ${sc_package_name}.${class_name}InsertStatementCreator;
+import ${sc_package_name}.${class_name}UpdateStatementCreator;
+/**
+ * The Class $class_name_.
+ */
+ @org.springframework.stereotypeRepository("${STRING_UTILS.uncapitalize($class_name_)}")
+public class $class_name_ implements $dao_class_name_ {
+
+	/** The JDBC template. */
+	@Autowired
+	private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+	
+	/** The Constant LIST_ALL_QUERY. */
+	private static final String LIST_ALL_QUERY = "SELECT $STRING_UTILS.join($columns, ',') FROM $table_name";
+	
+	/** The Constant FIND_ONE_QUERY. */
+	private static final String FIND_ONE_QUERY = "SELECT $STRING_UTILS.join($columns, ',') FROM $table_name WHERE ${STRING_UTILS.join($whereColumns, " and ")}";
+	
+	/** The Constant DELETE_QUERY. */
+	private static final String DELETE_QUERY = "DELETE FROM $table_name WHERE ${STRING_UTILS.join($whereColumns, " and ")}";
+
+	/** The Constant DELETE_ALL_QUERY. */
+	private static final String DELETE_ALL_QUERY = "DELETE FROM $table_name";
+	
+	/**
+	 * List.
+	 *
+	 * @return the java.util. list
+	 */
+	@Override
+	public java.util.List<$class_name> list() {
+		return jdbcTemplate.query(LIST_ALL_QUERY, new ${class_name}RowMapper());
+	}
+	
+	/**
+	 * Gets the.
+	 *
+	 * @return the $class_name
+	 */
+	@Override
+	public $class_name get($STRING_UTILS.join($find_one_method_agrs, ' ,')) {
+		return jdbcTemplate.queryForObject(FIND_ONE_QUERY, new Object[] { $STRING_UTILS.join($find_one_query_agrs, ' ,') }, new ${class_name}RowMapper());
+	}
+	
+	/**
+	 * Find by property.
+	 *
+	 * @param column the column
+	 * @param value the value
+	 * @return the parameters
+	 */	
+	@Override
+	public java.util.List<$class_name> findByProperty(${dao_class_name_}.Columns column, Object value) {
+		final String query = LIST_ALL_QUERY + " WHERE "+String.valueOf(column)+"=?";
+		return jdbcTemplate.query(LIST_ALL_QUERY, new Object[] { value }, new ${class_name}RowMapper());
+	}
+	
+	/**
+	 * Save.
+	 *
+	 * @param $STRING_UTILS.uncapitalize($class_name) the $STRING_UTILS.uncapitalize($class_name)
+	 * @return the $STRING_UTILS.uncapitalize($class_name)
+	 */
+	@Override
+	public $class_name save($class_name $STRING_UTILS.uncapitalize($class_name)) {
+		return jdbcTemplate.update(new ${class_name}InsertStatementCreator($STRING_UTILS.uncapitalize($class_name)));
+	}
+
+	/**
+	 * Update.
+	 *
+	 * @param $STRING_UTILS.uncapitalize($class_name) the $STRING_UTILS.uncapitalize($class_name)
+	 * @return the $STRING_UTILS.uncapitalize($class_name)
+	 */
+	@Override
+	public $class_name update($class_name $STRING_UTILS.uncapitalize($class_name)) {
+		return jdbcTemplate.update(new ${class_name}UpdateStatementCreator($STRING_UTILS.uncapitalize($class_name)));
+	}
+	
+	/**
+	 * Delete.
+	 *
+	 * @return the int
+	 */	
+	@Override
+	public boolean delete($STRING_UTILS.join($find_one_method_agrs, ' ,')) {
+		final int rowCount = jdbcTemplate.update(DELETE_QUERY, new Object[] { $STRING_UTILS.join($find_one_query_agrs, ' ,') });
+		return (rowCount > 0);		
+	}
+	
+	/**
+	 * Delete all.
+	 *
+	 * @return the int
+	 */
+	@Override
+	public boolean deleteAll() {
+		final int rowCount = jdbcTemplate.update(DELETE_ALL_QUERY);
+		return (rowCount > 0);
+	}
+	
+}//class

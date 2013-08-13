@@ -1,0 +1,41 @@
+package $package_name;
+
+#set( $class_name = $STRING_UTILS.capitalize($class_name)+''+$entity_suffix)
+#set( $builder_class_name = $STRING_UTILS.capitalize($class_name)+'Builder')
+
+/**
+ * The Class $class_name.
+ */
+public class $class_name {
+
+#foreach( $field in $fields )
+    private $field.dataType $STRING_UTILS.uncapitalize($field.name);
+#end
+
+	/**
+	* default class constructor
+	*/
+	public $class_name(){
+		super();
+	}
+
+#foreach( $field in $fields )
+#set( $field_name = $STRING_UTILS.uncapitalize($field.name))
+#if($STRING_UTILS.equals($field.dataType, "java.lang.Boolean"))
+    public $field.dataType is$STRING_UTILS.capitalize($field.name)() {
+    	return $STRING_UTILS.uncapitalize($field.name);
+    }
+
+#else
+    public $field.dataType get$STRING_UTILS.capitalize($field.name)() {
+    	return $STRING_UTILS.uncapitalize($field.name);
+    }
+
+#end
+    public void set$STRING_UTILS.capitalize($field.name)($field.dataType $STRING_UTILS.uncapitalize($field.name)) {
+    	this.$STRING_UTILS.uncapitalize($field.name) = $STRING_UTILS.uncapitalize($field.name);
+    }
+
+#end
+
+}//class

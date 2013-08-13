@@ -1,0 +1,52 @@
+import $package_name;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.springframework.jdbc.core.RowMapper;
+
+import ${entity_package_name}.${class_name};
+#set( $class_name = ${class_name}+${rm_suffix})
+
+/**
+ * The Class $class_name
+ */
+public class $class_name implements RowMapper<$mapper_class_name> {
+
+	/**
+	 * 
+	 * @param inResultSet
+	 *            the in result set
+	 * @param inIndex
+	 *            the in index
+	 * @return the currency pair vo
+	 * @throws SQLException
+	 *             the sQL exception
+	 */
+	@Override
+	public $mapper_class_name mapRow(final ResultSet inResultSet, final int inIndex) throws SQLException {
+#set( $instance = $STRING_UTILS.uncapitalize($mapper_class_name) )	
+		final $mapper_class_name $instance = new $mapper_class_name();
+
+#foreach( $field in $fields )
+#if($STRING_UTILS.equals($field.dataType,"java.lang.String"))
+		${instance}.set$STRING_UTILS.capitalize($field.name)(inResultSet.getString("$field.columnName"));
+#elseif($STRING_UTILS.equals($field.dataType,"java.lang.Integer"))
+		${instance}.set$STRING_UTILS.capitalize($field.name)(inResultSet.getInt("$field.columnName"));
+#elseif($STRING_UTILS.equals($field.dataType,"java.lang.Long"))
+		${instance}.set$STRING_UTILS.capitalize($field.name)(inResultSet.getLong("$field.columnName"));
+#elseif($STRING_UTILS.equals($field.dataType,"java.util.Date"))
+		${instance}.set$STRING_UTILS.capitalize($field.name)(inResultSet.getDate("$field.columnName"));
+#elseif($STRING_UTILS.equals($field.dataType,"java.util.Float"))
+		${instance}.set$STRING_UTILS.capitalize($field.name)(inResultSet.getFloat("$field.columnName"));
+#elseif($STRING_UTILS.equals($field.dataType,"java.util.Double"))
+		${instance}.set$STRING_UTILS.capitalize($field.name)(inResultSet.getDouble("$field.columnName"));
+#elseif($STRING_UTILS.equals($field.dataType,"java.lang.Boolean"))
+		${instance}.set$STRING_UTILS.capitalize($field.name)(inResultSet.getBoolean("$field.columnName"));
+#end
+#end
+		
+		return $instance;
+	}//mapRow()
+
+}//class

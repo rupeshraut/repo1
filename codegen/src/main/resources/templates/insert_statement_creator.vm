@@ -1,0 +1,83 @@
+package $package_name;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+
+import org.springframework.jdbc.core.PreparedStatementCreator;
+
+import ${entity_package_name}.${class_name};
+#set( $class_name = $class_name+"InsertStatementCreator" )
+/**
+ * The Class $class_name.
+ */
+public class $class_name implements PreparedStatementCreator {
+
+	/** The report vo. */
+	final $mapper_class_name $STRING_UTILS.uncapitalize($mapper_class_name);
+	
+	/** The Constant INSERT_QUERY. */
+	private final static StringBuffer INSERT_QUERY = new StringBuffer();
+	
+	static {
+#foreach($var in $queryList)
+		INSERT_QUERY.append(" $var ");
+#end
+	}
+
+	/**
+	 * Instantiates a new  insert statement creator.
+	 * 
+	 * @param $STRING_UTILS.uncapitalize($mapper_class_name)
+	 *            the $STRING_UTILS.uncapitalize($mapper_class_name)
+	 */
+	public $class_name($mapper_class_name $STRING_UTILS.uncapitalize($mapper_class_name)) {
+		super();
+		this.$STRING_UTILS.uncapitalize($mapper_class_name) = $STRING_UTILS.uncapitalize($mapper_class_name);
+	}
+
+	/**
+	 * Creates the prepared statement.
+	 *
+	 * @param inConnection the in connection
+	 * @return the prepared statement
+	 * @throws SQLException the sQL exception
+	 * @see org.springframework.jdbc.core.PreparedStatementCreator#
+	 * createPreparedStatement(java.sql.Connection)
+	 */
+	@Override
+	public PreparedStatement createPreparedStatement(final Connection inConnection) throws SQLException {
+		PreparedStatement preparedStatement = inConnection.prepareStatement(INSERT_QUERY.toString());
+		compilePreparedStatement(preparedStatement);
+		return preparedStatement;
+	}
+
+	/**
+	 * Compile prepared statement.
+	 *
+	 * @param preparedStatement the prepared statement
+	 * @throws SQLException 
+	 */
+	private void compilePreparedStatement(final PreparedStatement preparedStatement) throws SQLException {
+#set( $class_inst = $STRING_UTILS.uncapitalize($mapper_class_name))
+#foreach( $field in $fields )
+#if($STRING_UTILS.equals($field.dataType,"java.lang.String"))
+		preparedStatement.setString($foreach.count, ${class_inst}.get$STRING_UTILS.capitalize($field.name)());
+#elseif($STRING_UTILS.equals($field.dataType,"java.lang.Integer"))
+		preparedStatement.seInt($foreach.count, ${class_inst}.get$STRING_UTILS.capitalize($field.name)());
+#elseif($STRING_UTILS.equals($field.dataType,"java.lang.Long"))
+		preparedStatement.setLong($foreach.count, ${class_inst}.get$STRING_UTILS.capitalize($field.name)());
+#elseif($STRING_UTILS.equals($field.dataType,"java.util.Date"))
+		preparedStatement.setDate($foreach.count, ${class_inst}.get$STRING_UTILS.capitalize($field.name)());
+#elseif($STRING_UTILS.equals($field.dataType,"java.util.Float"))
+		preparedStatement.setFloat($foreach.count, ${class_inst}.get$STRING_UTILS.capitalize($field.name)());
+#elseif($STRING_UTILS.equals($field.dataType,"java.util.Double"))
+		preparedStatement.setDouble($foreach.count, ${class_inst}.get$STRING_UTILS.capitalize($field.name)());
+#elseif($STRING_UTILS.equals($field.dataType,"java.lang.Boolean"))
+		preparedStatement.setBoolean($foreach.count, ${class_inst}.is$STRING_UTILS.capitalize($field.name)());
+#end
+#end
+	}
+
+}
