@@ -1,3 +1,4 @@
+package org.jtags.datatable;
 
 /**
  * The Class DataPaginatorException.
