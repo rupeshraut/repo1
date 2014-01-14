@@ -11,12 +11,12 @@ import java.util.ListIterator;
  * The Class DataListHandler.
  * 
  * @param <E>
- *           the element type
+ *            the element type
  */
-public class DataPaginator<E> implements Serializable{
+public class DataPaginator<E> implements Serializable {
 
-   /** The Constant serialVersionUID. */
-   private static final long serialVersionUID = 1L;
+	/** The Constant serialVersionUID. */
+	private static final long serialVersionUID = 1L;
 
 	/** The list. */
 	private final List<E> list;
@@ -37,7 +37,7 @@ public class DataPaginator<E> implements Serializable{
 	 * Instantiates a new data list handler.
 	 * 
 	 * @param list
-	 *           the list
+	 *            the list
 	 */
 	public DataPaginator(List<E> list) {
 		super();
@@ -58,7 +58,7 @@ public class DataPaginator<E> implements Serializable{
 	 * Sets the rows per page.
 	 * 
 	 * @param rowsPerPage
-	 *           the new rows per page
+	 *            the new rows per page
 	 */
 	public void setRowsPerPage(int rowsPerPage) {
 		this.rowsPerPage = rowsPerPage;
@@ -78,7 +78,7 @@ public class DataPaginator<E> implements Serializable{
 	 * Sets the current page index.
 	 * 
 	 * @param currentPageIndex
-	 *           the new current page index
+	 *            the new current page index
 	 */
 	public void setCurrentPageIndex(int currentPageIndex) {
 		this.currentPageIndex = currentPageIndex;
@@ -97,7 +97,7 @@ public class DataPaginator<E> implements Serializable{
 	 * Sets the number of pages.
 	 * 
 	 * @param numberOfPages
-	 *           the new number of pages
+	 *            the new number of pages
 	 */
 	public void setNumberOfPages(int numberOfPages) {
 		this.numberOfPages = numberOfPages;
@@ -116,10 +116,10 @@ public class DataPaginator<E> implements Serializable{
 	 * Page.
 	 * 
 	 * @param pageNumber
-	 *           the page number
+	 *            the page number
 	 * @return the list
 	 * @throws DataPaginatorException
-	 *            the data paginator exception
+	 *             the data paginator exception
 	 */
 	public List<E> page(final int pageNumber) throws DataPaginatorException {
 
@@ -129,10 +129,9 @@ public class DataPaginator<E> implements Serializable{
 
 		if (pageNumber == 1) {
 			return first();
-		} else
-			if (pageNumber == getNumberOfPages()) {
-				return last();
-			}// if
+		} else if (pageNumber == getNumberOfPages()) {
+			return last();
+		}// if
 
 		first();
 
@@ -148,7 +147,7 @@ public class DataPaginator<E> implements Serializable{
 	 * 
 	 * @return the list
 	 * @throws DataPaginatorException
-	 *            the data paginator exception
+	 *             the data paginator exception
 	 */
 	public List<E> first() throws DataPaginatorException {
 		if (this.listIterator == null) {
@@ -174,7 +173,7 @@ public class DataPaginator<E> implements Serializable{
 	 * 
 	 * @return the list
 	 * @throws DataPaginatorException
-	 *            the data paginator exception
+	 *             the data paginator exception
 	 */
 	public List<E> last() throws DataPaginatorException {
 		if (this.listIterator == null) {
@@ -220,21 +219,30 @@ public class DataPaginator<E> implements Serializable{
 	 * 
 	 * @return the list
 	 * @throws DataPaginatorException
-	 *            the data paginator exception
+	 *             the data paginator exception
 	 */
 	public List<E> next() throws DataPaginatorException {
 		if (this.listIterator == null) {
 			throw new DataPaginatorException("No data found");
 		}// if
 
+		if (this.currentPageIndex == getNumberOfPages()) {
+			return last();
+		}
+
 		final List<E> localList = new LinkedList<E>();
 		int ctr = 0;
+		
+		while ( (listIterator.nextIndex()) != ((currentPageIndex * rowsPerPage))) {
+			listIterator.next();
+		}
+		
 		while (listIterator.hasNext() && ctr < getRowsPerPage()) {
 			localList.add(listIterator.next());
 			ctr++;
 		}// while
 
-		currentPageIndex++;
+		++currentPageIndex;
 
 		return localList;
 	}// next()
@@ -244,25 +252,33 @@ public class DataPaginator<E> implements Serializable{
 	 * 
 	 * @return the list
 	 * @throws DataPaginatorException
-	 *            the data paginator exception
+	 *             the data paginator exception
 	 */
 	public List<E> previous() throws DataPaginatorException {
 		if (this.listIterator == null) {
 			throw new DataPaginatorException("No data found");
 		}// if
 
-		if (this.currentPageIndex == 1) {
+
+		if (this.currentPageIndex <= 1) {
 			return first();
 		}
 
+		--currentPageIndex;
+		
 		final List<E> localList = new LinkedList<E>();
 		int ctr = 0;
+		
+		while ( (listIterator.previousIndex() + 1) != (currentPageIndex * rowsPerPage)) {
+			listIterator.previous();
+		}
+		
 		while (listIterator.hasPrevious() && ctr < getRowsPerPage()) {
 			localList.add(listIterator.previous());
 			ctr++;
 		}// while
 
-		currentPageIndex--;
+		
 		Collections.reverse(localList);
 		return localList;
 	}// next()
@@ -278,7 +294,7 @@ public class DataPaginator<E> implements Serializable{
 	 * The main method.
 	 * 
 	 * @param args
-	 *           the arguments
+	 *            the arguments
 	 * @throws DataPaginatorException
 	 */
 	public static void main(String[] args) throws DataPaginatorException {
@@ -289,7 +305,6 @@ public class DataPaginator<E> implements Serializable{
 		}
 		final DataPaginator<String> dataPaginator = new DataPaginator<String>(strings);
 		dataPaginator.setRowsPerPage(11);
-		System.out.println("# of pages " + dataPaginator.getNumberOfPages());
 
 		List<String> list = dataPaginator.last();
 		for (String string : list) {
