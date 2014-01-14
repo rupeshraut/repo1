@@ -15,7 +15,7 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
 public class PaginatorTag extends SimpleTagSupport implements DynamicAttributes {
 
 	/** The tag attributes. */
-	final Map<String, Object> tagAttributes = new HashMap<String, Object>(1);
+	final private Map<String, Object> tagAttributes = new HashMap<String, Object>(1);
 
 	/** The rows per page. */
 	private int rowsPerPage;
@@ -62,6 +62,15 @@ public class PaginatorTag extends SimpleTagSupport implements DynamicAttributes 
 	}
 
 	/**
+	 * Gets the tag attributes.
+	 * 
+	 * @return the tag attributes
+	 */
+	public Map<String, Object> getTagAttributes() {
+		return tagAttributes;
+	}
+
+	/**
 	 * Sets the dynamic attribute.
 	 * 
 	 * @param uri
@@ -72,8 +81,7 @@ public class PaginatorTag extends SimpleTagSupport implements DynamicAttributes 
 	 *            the value
 	 * @throws JspException
 	 *             the jsp exception
-	 * @see javax.servlet.jsp.tagext.DynamicAttributes#setDynamicAttribute(java.lang
-	 *      .String, java.lang.String, java.lang.Object)
+	 * @see javax.servlet.jsp.tagext.DynamicAttributes#setDynamicAttribute(java.lang .String, java.lang.String, java.lang.Object)
 	 */
 	@Override
 	public void setDynamicAttribute(String uri, String name, Object value) throws JspException {
