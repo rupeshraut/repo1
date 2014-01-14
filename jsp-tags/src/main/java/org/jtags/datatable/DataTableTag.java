@@ -18,6 +18,7 @@ import javax.servlet.jsp.tagext.DynamicAttributes;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
 import org.apache.commons.beanutils.MethodUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 // TODO: Auto-generated Javadoc
@@ -217,15 +218,15 @@ public class DataTableTag extends SimpleTagSupport implements DynamicAttributes 
 
 		output.append("<TR> ");
 		for (ColumnTag column : getColumns()) {
-			
+
 			if (column.isSortable()) {
-				output.append(MessageFormat.format("<TH width=\"{0}\" style=\"{1}\" ><a href=\"javascript:void(0)\">{2}</a></TH>", StringUtils.defaultString(column.getWidth()),
-						StringUtils.defaultString(column.getStyle()), StringUtils.defaultString(column.getTitle())));				
+				output.append(MessageFormat.format("<TH width=\"{0}\" style=\"{1}\" ><a href=\"javascript:void(0)\">{2}</a></TH>",
+						StringUtils.defaultString(column.getWidth()), StringUtils.defaultString(column.getStyle()),
+						StringUtils.defaultString(column.getTitle())));
 			} else {
 				output.append(MessageFormat.format("<TH width=\"{0}\" style=\"{1}\" >{2}</TH>", StringUtils.defaultString(column.getWidth()),
-						StringUtils.defaultString(column.getStyle()), StringUtils.defaultString(column.getTitle())));				
+						StringUtils.defaultString(column.getStyle()), StringUtils.defaultString(column.getTitle())));
 			}
-			
 
 		}// for
 		output.append("</TR> ");
@@ -244,28 +245,31 @@ public class DataTableTag extends SimpleTagSupport implements DynamicAttributes 
 			}// if
 		}// if
 
-		for (Object object : collection) {
-			output.append(MessageFormat.format("<TR bgcolor=\"{0}\"> ", ((rowCtr % 2 == 0) ? evenRowColor : oddRowColor)));
-			for (ColumnTag column : getColumns()) {
-				if (StringUtils.isNotEmpty(column.getBodyContent())) {
-					output.append(String.format("<TD>%s</TD>", column.getBodyContent()));
-					continue;
+		if (CollectionUtils.isNotEmpty(collection)) {
+			for (Object object : collection) {
+				output.append(MessageFormat.format("<TR bgcolor=\"{0}\"> ", ((rowCtr % 2 == 0) ? evenRowColor : oddRowColor)));
+				for (ColumnTag column : getColumns()) {
+					if (StringUtils.isNotEmpty(column.getBodyContent())) {
+						output.append(String.format("<TD>%s</TD>", column.getBodyContent()));
+						continue;
+					}// if
+
+					final Method method = MethodUtils.getMatchingAccessibleMethod(object.getClass(), "get" + StringUtils.capitalize(column.getProperty()),
+							new Class[] {});
+					if (method == null) {
+						throw new PropertyNotFoundException("No property found with name " + column.getProperty() + " in " + object.getClass());
+					}
+					Object value = method.invoke(object, new Object[] {});
+					output.append(String.format("<TD>%s</TD>", value));
+				}// for
+				output.append("</TR> ");
+				rowCtr++;
+
+				if (isPaginator && rowCtr > paginator.getRowsPerPage()) {
+					break;
 				}// if
-
-				final Method method = MethodUtils.getMatchingAccessibleMethod(object.getClass(), "get" + StringUtils.capitalize(column.getProperty()), new Class[]{});
-				if (method == null) {
-					throw new PropertyNotFoundException("No property found with name " + column.getProperty() + " in " + object.getClass());
-				}
-				Object value = method.invoke(object, new Object[] {});
-				output.append(String.format("<TD>%s</TD>", value));
 			}// for
-			output.append("</TR> ");
-			rowCtr++;
-
-			if (isPaginator && rowCtr > paginator.getRowsPerPage()) {
-				break;
-			}// if
-		}// for
+		}//if
 
 		output.append("</TABLE> ");
 		output.append("</DIV> ");
@@ -283,22 +287,26 @@ public class DataTableTag extends SimpleTagSupport implements DynamicAttributes 
 	 */
 	private void renderPaginator(final JspContext jspContext) throws Exception {
 		final StringBuffer output = new StringBuffer();
-		final String currentPage = (String) jspContext.findAttribute("currentPage");
-		final String totalItems = (String) jspContext.findAttribute("totalItems");
-		final String totalPages = (String) jspContext.findAttribute("totalPages");
+		final Integer currentPage = (Integer) jspContext.findAttribute("currentPage");
+		final Integer totalItems = (Integer) jspContext.findAttribute("totalItems");
+		final Integer totalPages = (Integer) jspContext.findAttribute("totalPages");
+		final Integer from = (Integer) jspContext.findAttribute("from");
+		final Integer to = (Integer) jspContext.findAttribute("to");
 
 		output.append("<div ");
 		for (Map.Entry<String, Object> entry : getPaginator().getTagAttributes().entrySet()) {
 			output.append(MessageFormat.format(" {0}=\"{1}\" ", entry.getKey(), entry.getValue()));
-		}//for
+		}// for
 		output.append("> ");
-		
+
 		output.append("<a href=\"?page=first\">first</a>&nbsp;|&nbsp;");
 		output.append(MessageFormat.format("<a href=\"?page=next&currentpage={0}\">next</a>&nbsp;|&nbsp;", currentPage));
 		output.append(MessageFormat.format("<a href=\"?page=previous&currentpage={0}\">previous</a>&nbsp;|&nbsp;", currentPage));
 		output.append("<a href=\"?page=last\">last</a>");
 		output.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-		output.append(MessageFormat.format("page {0} of {1}", currentPage, totalPages));
+		output.append(MessageFormat.format("<span style=\"color:#ff3300\">[page {0} of {1}]</span>", currentPage, totalPages));
+		output.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+		output.append(MessageFormat.format("<span style=\"color:#ff3300\">[{0} to {1}] of {2}</span>", from,to, totalItems));
 		output.append("</div>");
 		jspContext.getOut().write(output.toString());
 	}
