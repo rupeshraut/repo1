@@ -306,7 +306,7 @@ public class DataTableTag extends SimpleTagSupport implements DynamicAttributes 
 		output.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
 		output.append(MessageFormat.format("<span style=\"color:#ff3300\">[page {0} of {1}]</span>", currentPage, totalPages));
 		output.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-		output.append(MessageFormat.format("<span style=\"color:#ff3300\">[{0} to {1}] of {2}</span>", from,to, totalItems));
+		output.append(MessageFormat.format("<span style=\"color:#ff3300\">[records {0} to {1} of {2}]</span>", from,to, totalItems));
 		output.append("</div>");
 		jspContext.getOut().write(output.toString());
 	}
