@@ -1,10 +1,15 @@
 package org.jtags.web.servlet;
 
+import java.io.Serializable;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class Items.
  */
-public class Items {
+public class Items implements Serializable {
+
+	/** The Constant serialVersionUID. */
+	private static final long serialVersionUID = 1L;
 
 	/** The name. */
 	private String name;
