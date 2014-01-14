@@ -19,8 +19,8 @@ a:active {background-color:#FFFF85;}
 </head>
 <body>
 
-	<jtag:datatable items="items" name="list" style="width:600px;font-size:10pt;font-family:verdana" rowColors="#FFFFFF,#CCCCFF">
-		<jtag:paginator rowsPerPage="20" location="header,footer" style="width:600px;background-color:#EEEEEE;font-size:10pt;font-family:verdana;font-weight:normal;text-align:left;padding-left:2px;padding-top:5px;padding-bottom:5px;border:1px dashed #000000"/>
+	<jtag:datatable items="items" name="list" style="width:700px;font-size:10pt;font-family:verdana" rowColors="#FFFFFF,#CCCCFF">
+		<jtag:paginator rowsPerPage="20" location="header,footer" style="width:700px;background-color:#EEEEEE;font-size:10pt;font-family:verdana;font-weight:normal;text-align:left;padding-left:2px;padding-top:5px;padding-bottom:5px;border:1px dashed #000000"/>
 		<jtag:column property="name" title="Item Name" sortable="false" style="font-weight:bold;background-color:#336699;color:#ffffff"/>
 		<jtag:column property="price" title="Pricie" style="font-weight:bold;background-color:#336699;color:#ffffff"/>
 		<jtag:column property="" title="Action" style="font-weight:bold;background-color:#336699;color:#ffffff"><a href="javascript:void(0)">Edit</a></jtag:column>
