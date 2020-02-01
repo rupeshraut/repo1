@@ -25,7 +25,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StopWatch;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
 import java.sql.Connection;
@@ -43,12 +42,44 @@ public class Main {
 
     private static final VelocityContext VELOCITY_CONTEXT = new VelocityContext();
 
-    private static final Map<String, String> DATA_TYPE_MAP = new HashMap<String, String>(1);
+    /**
+     * The constant PACKAGE_NAME.
+     */
+    public static final String PACKAGE_NAME = "package_name";
 
     private static final String[] IGNORE_TABLES = new String[]{"Zudit", "TEMP_", "ZTEMP_", "ZZTEMP_"};
 
     private static final BasicDataSource DATA_SOURCE = new BasicDataSource();
     private static final CompositeConfiguration CONFIGURATION = new CompositeConfiguration();
+    /**
+     * The constant CLASS_NAME_SUFFIX.
+     */
+    public static final String CLASS_NAME_SUFFIX = "class_name_suffix";
+    /**
+     * The constant CLASS_NAME.
+     */
+    public static final String CLASS_NAME = "class_name";
+    /**
+     * The constant FIELDS.
+     */
+    public static final String FIELDS = "fields";
+    /**
+     * The constant JAVA.
+     */
+    public static final String JAVA = ".java";
+    /**
+     * The constant ENTITY_PACKAGE_NAME.
+     */
+    public static final String ENTITY_PACKAGE_NAME = "entity_package_name";
+    /**
+     * The constant PK_COLUMNS.
+     */
+    public static final String PK_COLUMNS = "pkColumns";
+    /**
+     * The constant NO_PK_COLUMNS.
+     */
+    public static final String NO_PK_COLUMNS = "noPKColumns";
+    private static final Map<String, String> DATA_TYPE_MAP = new HashMap<>(1);
     private static String BASE_PACKAGE;
     private static String ENTITY_PACKAGE;
     private static String SC_PACKAGE;
@@ -103,10 +134,9 @@ public class Main {
     /**
      * Init.
      *
-     * @throws IOException            the io exception
      * @throws ConfigurationException the configuration exception
      */
-    static void init() throws IOException, ConfigurationException {
+    static void init() throws ConfigurationException {
         final URL url = Thread.currentThread().getContextClassLoader().getResource("codegen.properties");
         CONFIGURATION.addConfiguration(new PropertiesConfiguration(url));
 
@@ -141,7 +171,7 @@ public class Main {
      */
     public static void main(String[] args) throws CodegenException {
         new Main().generateCode();
-    }// main
+    }// main∫
 
     /**
      * Close data source.
@@ -258,7 +288,7 @@ public class Main {
         if (CollectionUtils.isEmpty(tables)) {
             return;
         }// if
-        Template entityTemplate = null;
+        Template entityTemplate;
 
         if (withBuilder) {
             entityTemplate = Velocity.getTemplate("templates/entity_with_builder.vm");
@@ -267,23 +297,23 @@ public class Main {
         }// if-else
 
         try {
-            VELOCITY_CONTEXT.put("package_name", ENTITY_PACKAGE);
-            VELOCITY_CONTEXT.put("class_name_suffix", classNameSuffix);
+            VELOCITY_CONTEXT.put(PACKAGE_NAME, ENTITY_PACKAGE);
+            VELOCITY_CONTEXT.put(CLASS_NAME_SUFFIX, classNameSuffix);
             for (Table table : tables) {
 
-                VELOCITY_CONTEXT.put("class_name", table.getName());
-                VELOCITY_CONTEXT.put("fields", table.getColumns());
+                VELOCITY_CONTEXT.put(CLASS_NAME, table.getName());
+                VELOCITY_CONTEXT.put(FIELDS, table.getColumns());
 
                 final StringWriter writer = new StringWriter();
                 entityTemplate.merge(VELOCITY_CONTEXT, writer);
                 final String dir = StringUtils
-                        .replaceEach((String) VELOCITY_CONTEXT.get("package_name"), new String[]{"."}, new String[]{File.separator});
+                        .replaceEach((String) VELOCITY_CONTEXT.get(PACKAGE_NAME), new String[]{"."}, new String[]{File.separator});
                 final File dirFile = new File(dir);
                 if (dirFile.exists()) {
                     FileUtils.forceMkdir(dirFile);
                 }// if
 
-                FileUtils.writeStringToFile(new File(dirFile.getAbsolutePath(), StringUtils.capitalize(table.getName()) + classNameSuffix + ".java"),
+                FileUtils.writeStringToFile(new File(dirFile.getAbsolutePath(), StringUtils.capitalize(table.getName()) + classNameSuffix + JAVA),
                         writer.toString());
                 // log.info(writer.toString());
                 IOUtils.closeQuietly(writer);
@@ -305,18 +335,18 @@ public class Main {
         }
         try {
             final Template template = Velocity.getTemplate("templates/rowmapper.vm");
-            VELOCITY_CONTEXT.put("package_name", RM_PACKAGE);
-            VELOCITY_CONTEXT.put("entity_package_name", ENTITY_PACKAGE);
+            VELOCITY_CONTEXT.put(PACKAGE_NAME, RM_PACKAGE);
+            VELOCITY_CONTEXT.put(ENTITY_PACKAGE_NAME, ENTITY_PACKAGE);
 
             for (Table table : tables) {
-                VELOCITY_CONTEXT.put("class_name", table.getName());
+                VELOCITY_CONTEXT.put(CLASS_NAME, table.getName());
                 VELOCITY_CONTEXT.put("mapper_class_name", table.getName());
-                VELOCITY_CONTEXT.put("fields", table.getColumns());
+                VELOCITY_CONTEXT.put(FIELDS, table.getColumns());
 
                 final StringWriter writer = new StringWriter();
                 template.merge(VELOCITY_CONTEXT, writer);
                 final String dir = StringUtils
-                        .replaceEach((String) VELOCITY_CONTEXT.get("package_name"), new String[]{"."}, new String[]{File.separator});
+                        .replaceEach((String) VELOCITY_CONTEXT.get(PACKAGE_NAME), new String[]{"."}, new String[]{File.separator});
                 final File dirFile = new File(dir);
                 if (dirFile.exists()) {
                     FileUtils.forceMkdir(dirFile);
@@ -345,7 +375,7 @@ public class Main {
 
         Template template = null;
         String tmpTable = "";
-        VELOCITY_CONTEXT.put("package_name", SC_PACKAGE);
+        VELOCITY_CONTEXT.put(PACKAGE_NAME, SC_PACKAGE);
         try {
             if (statementType == StatementType.INSERT) {
                 template = Velocity.getTemplate("templates/insert_statement_creator.vm");
@@ -355,9 +385,9 @@ public class Main {
 
             for (Table table : tables) {
                 tmpTable = table.getName();
-                VELOCITY_CONTEXT.put("class_name", table.getName());
+                VELOCITY_CONTEXT.put(CLASS_NAME, table.getName());
                 VELOCITY_CONTEXT.put("mapper_class_name", table.getName());
-                VELOCITY_CONTEXT.put("fields", table.getColumns());
+                VELOCITY_CONTEXT.put(FIELDS, table.getColumns());
 
                 @SuppressWarnings("unchecked") final Collection<Column> pkColumns = CollectionUtils.select(table.getColumns(), new Predicate() {
                     @Override
@@ -372,13 +402,13 @@ public class Main {
                     }
                 });
 
-                VELOCITY_CONTEXT.put("pkColumns", pkColumns);
-                VELOCITY_CONTEXT.put("noPKColumns", noPKColumns);
+                VELOCITY_CONTEXT.put(PK_COLUMNS, pkColumns);
+                VELOCITY_CONTEXT.put(NO_PK_COLUMNS, noPKColumns);
 
-                List<String> queryList = new ArrayList<String>(1);
+                List<String> queryList = new ArrayList<>(1);
 
                 if (statementType == StatementType.INSERT) {
-                    VELOCITY_CONTEXT.put("fields", CollectionUtils.selectRejected(table.getColumns(), new Predicate() {
+                    VELOCITY_CONTEXT.put(FIELDS, CollectionUtils.selectRejected(table.getColumns(), new Predicate() {
 
                         @Override
                         public boolean evaluate(Object object) {
@@ -390,7 +420,7 @@ public class Main {
                     queryList.add(String.format("INSERT INTO %s (", table.getTableName()));
 
                     // for column name
-                    final List<String> columns = new ArrayList<String>(1);
+                    final List<String> columns = new ArrayList<>(1);
 
                     for (Column column : table.getColumns()) {
                         if (column.isPrimaryKey() && column.isIdentity()) {
@@ -444,7 +474,7 @@ public class Main {
                 final StringWriter writer = new StringWriter();
                 template.merge(VELOCITY_CONTEXT, writer);
                 final String dir = StringUtils
-                        .replaceEach((String) VELOCITY_CONTEXT.get("package_name"), new String[]{"."}, new String[]{File.separator});
+                        .replaceEach((String) VELOCITY_CONTEXT.get(PACKAGE_NAME), new String[]{"."}, new String[]{File.separator});
                 final File dirFile = new File(dir);
 
                 if (dirFile.exists()) {
@@ -480,9 +510,9 @@ public class Main {
         Template entityTemplate = Velocity.getTemplate("templates/dao.vm");
 
         try {
-            VELOCITY_CONTEXT.put("package_name", DAO_PACKAGE);
-            VELOCITY_CONTEXT.put("class_name_suffix", classNameSuffix);
-            VELOCITY_CONTEXT.put("entity_package_name", ENTITY_PACKAGE);
+            VELOCITY_CONTEXT.put(PACKAGE_NAME, DAO_PACKAGE);
+            VELOCITY_CONTEXT.put(CLASS_NAME_SUFFIX, classNameSuffix);
+            VELOCITY_CONTEXT.put(ENTITY_PACKAGE_NAME, ENTITY_PACKAGE);
             for (Table table : tables) {
 
                 @SuppressWarnings("unchecked") final Collection<Column> pkColumns = CollectionUtils.select(table.getColumns(), new Predicate() {
@@ -493,7 +523,7 @@ public class Main {
                 });
 
                 if (CollectionUtils.isNotEmpty(pkColumns)) {
-                    VELOCITY_CONTEXT.put("pkColumns", pkColumns);
+                    VELOCITY_CONTEXT.put(PK_COLUMNS, pkColumns);
 
                     VELOCITY_CONTEXT.put("find_one_method_agrs", CollectionUtils.collect(pkColumns, new Transformer() {
 
@@ -504,8 +534,8 @@ public class Main {
                         }
                     }));
                 }
-                VELOCITY_CONTEXT.put("class_name", table.getName());
-                VELOCITY_CONTEXT.put("fields", table.getColumns());
+                VELOCITY_CONTEXT.put(CLASS_NAME, table.getName());
+                VELOCITY_CONTEXT.put(FIELDS, table.getColumns());
 
                 // for column name enum
                 final List<String> names = new ArrayList<String>(1);
@@ -520,13 +550,13 @@ public class Main {
                 final StringWriter writer = new StringWriter();
                 entityTemplate.merge(VELOCITY_CONTEXT, writer);
                 final String dir = StringUtils
-                        .replaceEach((String) VELOCITY_CONTEXT.get("package_name"), new String[]{"."}, new String[]{File.separator});
+                        .replaceEach((String) VELOCITY_CONTEXT.get(PACKAGE_NAME), new String[]{"."}, new String[]{File.separator});
                 final File dirFile = new File(dir);
                 if (dirFile.exists()) {
                     FileUtils.forceMkdir(dirFile);
                 }// if
 
-                FileUtils.writeStringToFile(new File(dirFile.getAbsolutePath(), StringUtils.capitalize(table.getName()) + classNameSuffix + ".java"),
+                FileUtils.writeStringToFile(new File(dirFile.getAbsolutePath(), StringUtils.capitalize(table.getName()) + classNameSuffix + JAVA),
                         writer.toString());
                 // log.info(writer.toString());
                 IOUtils.closeQuietly(writer);
@@ -550,9 +580,9 @@ public class Main {
         final Template entityTemplate = Velocity.getTemplate("templates/dao_impl.vm");
 
         try {
-            VELOCITY_CONTEXT.put("package_name", DAO_IMPL_PACKAGE);
-            VELOCITY_CONTEXT.put("class_name_suffix", classNameSuffix);
-            VELOCITY_CONTEXT.put("entity_package_name", ENTITY_PACKAGE);
+            VELOCITY_CONTEXT.put(PACKAGE_NAME, DAO_IMPL_PACKAGE);
+            VELOCITY_CONTEXT.put(CLASS_NAME_SUFFIX, classNameSuffix);
+            VELOCITY_CONTEXT.put(ENTITY_PACKAGE_NAME, ENTITY_PACKAGE);
             VELOCITY_CONTEXT.put("dao_package_name", DAO_PACKAGE);
             VELOCITY_CONTEXT.put("sc_package_name", SC_PACKAGE);
             VELOCITY_CONTEXT.put("dao_class_name_suffix", "DAO");
@@ -567,7 +597,7 @@ public class Main {
                 });
 
                 if (CollectionUtils.isNotEmpty(pkColumns)) {
-                    VELOCITY_CONTEXT.put("pkColumns", pkColumns);
+                    VELOCITY_CONTEXT.put(PK_COLUMNS, pkColumns);
                 }
 
                 @SuppressWarnings("unchecked") final Collection<Column> noPKColumns = CollectionUtils.selectRejected(table.getColumns(), new Predicate() {
@@ -578,7 +608,7 @@ public class Main {
                 });
 
                 if (CollectionUtils.isNotEmpty(pkColumns)) {
-                    VELOCITY_CONTEXT.put("noPKColumns", noPKColumns);
+                    VELOCITY_CONTEXT.put(NO_PK_COLUMNS, noPKColumns);
                 }
 
                 final List<String> whereColumns = new ArrayList<String>(1);
@@ -591,8 +621,8 @@ public class Main {
                     VELOCITY_CONTEXT.put("whereColumns", whereColumns);
                 }
 
-                VELOCITY_CONTEXT.put("class_name", table.getName());
-                VELOCITY_CONTEXT.put("fields", table.getColumns());
+                VELOCITY_CONTEXT.put(CLASS_NAME, table.getName());
+                VELOCITY_CONTEXT.put(FIELDS, table.getColumns());
                 VELOCITY_CONTEXT.put("table_name", table.getTableName());
                 VELOCITY_CONTEXT.put("columns", CollectionUtils.collect(table.getColumns(), new Transformer() {
 
@@ -623,13 +653,13 @@ public class Main {
                 final StringWriter writer = new StringWriter();
                 entityTemplate.merge(VELOCITY_CONTEXT, writer);
                 final String dir = StringUtils
-                        .replaceEach((String) VELOCITY_CONTEXT.get("package_name"), new String[]{"."}, new String[]{File.separator});
+                        .replaceEach((String) VELOCITY_CONTEXT.get(PACKAGE_NAME), new String[]{"."}, new String[]{File.separator});
                 final File dirFile = new File(dir);
                 if (dirFile.exists()) {
                     FileUtils.forceMkdir(dirFile);
                 }// if
 
-                FileUtils.writeStringToFile(new File(dirFile.getAbsolutePath(), StringUtils.capitalize(table.getName()) + classNameSuffix + ".java"),
+                FileUtils.writeStringToFile(new File(dirFile.getAbsolutePath(), StringUtils.capitalize(table.getName()) + classNameSuffix + JAVA),
                         writer.toString());
                 // log.info(writer.toString());
                 IOUtils.closeQuietly(writer);
@@ -651,7 +681,7 @@ public class Main {
             tables = jdbcTemplate.execute(new ConnectionCallback<List<Table>>() {
 
                 @Override
-                public List<Table> doInConnection(Connection con) throws SQLException, DataAccessException {
+                public List<Table> doInConnection(Connection con) throws DataAccessException {
                     List<Table> tableList = null;
                     try {
                         tableList = discoverTables(CONFIGURATION.getString("codegen.table.pattern"), con);
@@ -733,7 +763,7 @@ public class Main {
         /**
          * Update statement type.
          */
-        UPDATE;
+        UPDATE
     }
 
 }
