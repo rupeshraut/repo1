@@ -19,7 +19,6 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.tools.generic.MathTool;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StopWatch;
@@ -40,17 +39,10 @@ import java.util.*;
 public class Main {
 
 
-    private static final VelocityContext VELOCITY_CONTEXT = new VelocityContext();
-
     /**
      * The constant PACKAGE_NAME.
      */
     public static final String PACKAGE_NAME = "package_name";
-
-    private static final String[] IGNORE_TABLES = new String[]{"Zudit", "TEMP_", "ZTEMP_", "ZZTEMP_"};
-
-    private static final BasicDataSource DATA_SOURCE = new BasicDataSource();
-    private static final CompositeConfiguration CONFIGURATION = new CompositeConfiguration();
     /**
      * The constant CLASS_NAME_SUFFIX.
      */
@@ -79,32 +71,40 @@ public class Main {
      * The constant NO_PK_COLUMNS.
      */
     public static final String NO_PK_COLUMNS = "noPKColumns";
+    public static final String S_S = "%s.%s";
+    public static final String JAVA_LANG_STRING = "java.lang.String";
+    public static final String JAVA_UTIL_DATE = "java.util.Date";
+    public static final String JAVA_LANG_INTEGER = "java.lang.Integer";
     private static final Map<String, String> DATA_TYPE_MAP = new HashMap<>(1);
+    private static final VelocityContext VELOCITY_CONTEXT = new VelocityContext();
     private static String BASE_PACKAGE;
     private static String ENTITY_PACKAGE;
     private static String SC_PACKAGE;
     private static String DAO_PACKAGE;
     private static String DAO_IMPL_PACKAGE;
     private static String RM_PACKAGE;
+    private static final String[] IGNORE_TABLES = new String[]{"Zudit", "TEMP_", "ZTEMP_", "ZZTEMP_"};
+    private static final BasicDataSource DATA_SOURCE = new BasicDataSource();
+    private static final CompositeConfiguration CONFIGURATION = new CompositeConfiguration();
 
     static {
 
-        DATA_TYPE_MAP.put("varchar", "java.lang.String");
-        DATA_TYPE_MAP.put("nvarchar", "java.lang.String");
-        DATA_TYPE_MAP.put("text", "java.lang.String");
-        DATA_TYPE_MAP.put("char", "java.lang.String");
-        DATA_TYPE_MAP.put("nchar", "java.lang.String");
+        DATA_TYPE_MAP.put("varchar", JAVA_LANG_STRING);
+        DATA_TYPE_MAP.put("nvarchar", JAVA_LANG_STRING);
+        DATA_TYPE_MAP.put("text", JAVA_LANG_STRING);
+        DATA_TYPE_MAP.put("char", JAVA_LANG_STRING);
+        DATA_TYPE_MAP.put("nchar", JAVA_LANG_STRING);
         DATA_TYPE_MAP.put("bit", "java.lang.Boolean");
-        DATA_TYPE_MAP.put("datetime", "java.util.Date");
-        DATA_TYPE_MAP.put("smalldatetime", "java.util.Date");
-        DATA_TYPE_MAP.put("datetime2", "java.util.Date");
-        DATA_TYPE_MAP.put("date", "java.util.Date");
-        DATA_TYPE_MAP.put("int", "java.lang.Integer");
-        DATA_TYPE_MAP.put("int identity", "java.lang.Integer");
-        DATA_TYPE_MAP.put("smallint", "java.lang.Integer");
-        DATA_TYPE_MAP.put("smallint identity", "java.lang.Integer");
-        DATA_TYPE_MAP.put("tinyint", "java.lang.Integer");
-        DATA_TYPE_MAP.put("tinyint identity", "java.lang.Integer");
+        DATA_TYPE_MAP.put("datetime", JAVA_UTIL_DATE);
+        DATA_TYPE_MAP.put("smalldatetime", JAVA_UTIL_DATE);
+        DATA_TYPE_MAP.put("datetime2", JAVA_UTIL_DATE);
+        DATA_TYPE_MAP.put("date", JAVA_UTIL_DATE);
+        DATA_TYPE_MAP.put("int", JAVA_LANG_INTEGER);
+        DATA_TYPE_MAP.put("int identity", JAVA_LANG_INTEGER);
+        DATA_TYPE_MAP.put("smallint", JAVA_LANG_INTEGER);
+        DATA_TYPE_MAP.put("smallint identity", JAVA_LANG_INTEGER);
+        DATA_TYPE_MAP.put("tinyint", JAVA_LANG_INTEGER);
+        DATA_TYPE_MAP.put("tinyint identity", JAVA_LANG_INTEGER);
         DATA_TYPE_MAP.put("bigint", "java.lang.Long");
         DATA_TYPE_MAP.put("bigint identity", "java.lang.Long");
         DATA_TYPE_MAP.put("float", "java.lang.Float");
@@ -113,7 +113,7 @@ public class Main {
         DATA_TYPE_MAP.put("image", "java.lang.Byte[]");
         DATA_TYPE_MAP.put("varbinary", "java.lang.Byte[]");
         DATA_TYPE_MAP.put("xml", "org.w3c.dom.Document");
-        DATA_TYPE_MAP.put("sysname", "java.lang.String");
+        DATA_TYPE_MAP.put("sysname", JAVA_LANG_STRING);
 
         Velocity.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         Velocity.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
@@ -146,11 +146,11 @@ public class Main {
         DATA_SOURCE.setPassword(CONFIGURATION.getString("codegen.jdbc.password"));
 
         BASE_PACKAGE = CONFIGURATION.getString("codegen.base.package.name");
-        ENTITY_PACKAGE = String.format("%s.%s", BASE_PACKAGE, CONFIGURATION.getString("codegen.entity.package.name"));
-        RM_PACKAGE = String.format("%s.%s", BASE_PACKAGE, CONFIGURATION.getString("codegen.rm.package.name"));
-        SC_PACKAGE = String.format("%s.%s", BASE_PACKAGE, CONFIGURATION.getString("codegen.sc.package.name"));
-        DAO_PACKAGE = String.format("%s.%s", BASE_PACKAGE, CONFIGURATION.getString("codegen.dao.package.name"));
-        DAO_IMPL_PACKAGE = String.format("%s.%s", BASE_PACKAGE, CONFIGURATION.getString("codegen.dao.impl.package.name"));
+        ENTITY_PACKAGE = String.format(S_S, BASE_PACKAGE, CONFIGURATION.getString("codegen.entity.package.name"));
+        RM_PACKAGE = String.format(S_S, BASE_PACKAGE, CONFIGURATION.getString("codegen.rm.package.name"));
+        SC_PACKAGE = String.format(S_S, BASE_PACKAGE, CONFIGURATION.getString("codegen.sc.package.name"));
+        DAO_PACKAGE = String.format(S_S, BASE_PACKAGE, CONFIGURATION.getString("codegen.dao.package.name"));
+        DAO_IMPL_PACKAGE = String.format(S_S, BASE_PACKAGE, CONFIGURATION.getString("codegen.dao.impl.package.name"));
 
         VELOCITY_CONTEXT.put("entity_suffix", CONFIGURATION.getString("codegen.entity.suffix"));
         VELOCITY_CONTEXT.put("rm_suffix", CONFIGURATION.getString("codegen.rm.suffix"));
@@ -178,7 +178,7 @@ public class Main {
      */
     void closeDataSource() {
         try {
-            if (DATA_SOURCE != null) {
+            if (Objects.nonNull(DATA_SOURCE)) {
                 DATA_SOURCE.close();
             }// if
         } catch (SQLException e) {
@@ -207,21 +207,6 @@ public class Main {
             while (tableResultSet.next()) {
                 final String tableName = tableResultSet.getString(3);
 
-                // ResultSet exportedKeysResultSet =
-                // databaseMetaData.getExportedKeys(null, null, tableName);
-                // System.out.println("==============" + tableName +
-                // "==============");
-                // while (exportedKeysResultSet.next()) {
-                // System.out.println("PKTABLE_NAME " +
-                // exportedKeysResultSet.getString("PKTABLE_NAME"));
-                // System.out.println("PKCOLUMN_NAME " +
-                // exportedKeysResultSet.getString("PKCOLUMN_NAME"));
-                // System.out.println("FKTABLE_NAME " +
-                // exportedKeysResultSet.getString("FKTABLE_NAME"));
-                // System.out.println("FKCOLUMN_NAME " +
-                // exportedKeysResultSet.getString("FKCOLUMN_NAME"));
-                // }
-                // System.out.println("=============================================");
                 final Table table = new Table(tableName, formatTableName(tableName));
                 if (StringUtils.startsWithAny(tableName, IGNORE_TABLES)) {
                     continue;
@@ -258,7 +243,6 @@ public class Main {
         } catch (Exception e) {
             throw new CodegenException(e);
         }
-        // log.info(tables);
         return tables;
     }// doSomething()
 
@@ -267,7 +251,6 @@ public class Main {
         boolean isPk = false;
         while (pkResultSet.next()) {
             final String name = pkResultSet.getString("COLUMN_NAME");
-            // log.info("COLUMN_NAME " + name);
             if (StringUtils.equalsIgnoreCase(columnName, name)) {
                 isPk = true;
                 break;
@@ -315,7 +298,6 @@ public class Main {
 
                 FileUtils.writeStringToFile(new File(dirFile.getAbsolutePath(), StringUtils.capitalize(table.getName()) + classNameSuffix + JAVA),
                         writer.toString());
-                // log.info(writer.toString());
                 IOUtils.closeQuietly(writer);
             }// for
         } catch (Exception e) {
@@ -558,7 +540,6 @@ public class Main {
 
                 FileUtils.writeStringToFile(new File(dirFile.getAbsolutePath(), StringUtils.capitalize(table.getName()) + classNameSuffix + JAVA),
                         writer.toString());
-                // log.info(writer.toString());
                 IOUtils.closeQuietly(writer);
             }// for
         } catch (Exception e) {
@@ -661,7 +642,6 @@ public class Main {
 
                 FileUtils.writeStringToFile(new File(dirFile.getAbsolutePath(), StringUtils.capitalize(table.getName()) + classNameSuffix + JAVA),
                         writer.toString());
-                // log.info(writer.toString());
                 IOUtils.closeQuietly(writer);
             }// for
         } catch (Exception e) {
@@ -681,7 +661,7 @@ public class Main {
             tables = jdbcTemplate.execute(new ConnectionCallback<List<Table>>() {
 
                 @Override
-                public List<Table> doInConnection(Connection con) throws DataAccessException {
+                public List<Table> doInConnection(Connection con) {
                     List<Table> tableList = null;
                     try {
                         tableList = discoverTables(CONFIGURATION.getString("codegen.table.pattern"), con);
